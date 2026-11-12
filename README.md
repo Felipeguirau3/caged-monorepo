@@ -10,7 +10,7 @@ apps/
   backend/                 API FastAPI e seus testes
     src/caged_api/
     tests/
-  frontend/                Espaco reservado para a interface web
+  frontend/                Painel React, TypeScript e Vite
 packages/
   analytics/               Pacote Python compartilhado de dados e analises
     src/caged_analytics/
@@ -82,11 +82,37 @@ repositorio, configure Git LFS antes de liberar o versionamento dos originais.
 
 ## Frontend e Exploracao
 
-`apps/frontend` esta reservado para a interface, sem impor um framework neste
-momento. `notebooks` recebe exploracoes; logica reutilizavel deve ir para
-`packages/analytics`. Jupyter e dependencias de frontend ainda nao sao instalados.
+O frontend usa React, TypeScript, Vite, React Router, TanStack Query, Recharts e
+CSS Modules. Requer Node.js 24 LTS com npm. Execute na raiz:
+
+```powershell
+npm ci
+npm run dev
+```
+
+Acesse http://127.0.0.1:5173 (ou a porta informada pelo Vite, se estiver ocupada).
+O painel tem filtros de periodo, municipio e setor, graficos, comparacao entre
+municipios, pesquisa na tabela e exportacao CSV. Todos os valores sao ficticios,
+restritos a 2025, e nao representam estatisticas oficiais do CAGED.
+O backend nao precisa estar em execucao para esta demonstracao.
+
+Detalhes em [apps/frontend/README.md](apps/frontend/README.md). As dependencias
+JavaScript sao gerenciadas pelo workspace npm da raiz e por `package-lock.json`.
+
+`notebooks` recebe exploracoes; logica reutilizavel Python deve ir para
+`packages/analytics`. Jupyter ainda nao e instalado.
 
 ## Validacao
 
 A integracao continua executa os testes e o Ruff em Python 3.11 e 3.14.
 Os testes criam planilhas temporarias e nao dependem dos arquivos reais do CAGED.
+O job de frontend usa Node.js 24 e executa:
+
+```powershell
+npm test
+npm run build
+```
+
+O build verifica os tipos TypeScript antes de gerar os arquivos em
+`apps/frontend/dist`. Em hospedagens estaticas, configure o fallback de rotas
+para `index.html`, permitindo acesso direto a `/comparar`.

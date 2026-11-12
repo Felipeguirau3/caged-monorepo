@@ -122,4 +122,14 @@
 	.dashboardColumn:nth-child(2) > :first-child { order: 3; }
 	.dashboardColumn:nth-child(2) > :nth-child(2) { order: 1; }
 }
+	@media (min-width: 901px) {
+		.dashboardColumn:first-child > :first-child { height: 370px; }
+		.dashboardColumn:first-child > :first-child .chart { height: 277px; }
+		.dashboardColumn:first-child > :nth-child(2) { display: flex; flex-direction: column; height: 380px; }
+		.dashboardColumn:first-child > :nth-child(2) .tableScroll { flex: 1; min-height: 0; overflow: auto; }
+		.dashboardColumn:nth-child(2) > :first-child { height: 295px; }
+		.dashboardColumn:nth-child(2) > :first-child .sectorChart { height: 202px; }
+		.dashboardColumn:nth-child(2) > :nth-child(2) { height: 400px; }
+		.dashboardColumn:nth-child(2) > :nth-child(2) .chart { height: 278px; }
+	}
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

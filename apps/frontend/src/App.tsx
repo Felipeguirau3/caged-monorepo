@@ -2,7 +2,7 @@ import { useDeferredValue, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
 import {
-  ArrowDownToLine, ArrowRightLeft, ChevronRight, Database,
+  ArrowDownToLine, ArrowRightLeft, ChevronDown, ChevronRight, Database,
   ExternalLink, Info, LayoutDashboard, LogOut, Menu,
   RotateCcw, Search, UserRound, X,
 } from 'lucide-react';
@@ -112,8 +112,9 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
                   <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
                   <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
                 </div>
-                <div className={`${styles.categoryFilters} ${comparison ? styles.singleCategory : ''}`}>
+                <div className={styles.categoryFilters}>
                   {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
+                  {comparison && <div className={styles.multiSelectField}><span>Municipios</span><details className={styles.cityMultiSelect}><summary aria-label="Selecionar municipios"><span>{selectedCities.length === 0 ? 'Selecionar municipios' : `${selectedCities.length} municipios selecionados`}</span><ChevronDown size={16} /></summary><div className={styles.cityOptions} role="group" aria-label="Municipios disponiveis">{cities.map((city) => <label key={city}><input type="checkbox" checked={selectedCities.includes(city)} onChange={(event) => setSelectedCities(event.target.checked ? [...selectedCities, city] : selectedCities.filter((value) => value !== city))} /><span>{city}</span></label>)}</div></details></div>}
                   <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
                 </div>
               </div>
@@ -124,8 +125,6 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
               <article className={styles.metricSummary}><span>Desligamentos</span><strong>{number.format(total.dismissals)}</strong></article>
             </section>
           </div>
-
-          {comparison && <fieldset className={styles.cityPicker}><legend>Municipios na comparacao</legend>{cities.map((city) => <label key={city}><input type="checkbox" checked={selectedCities.includes(city)} onChange={(event) => setSelectedCities(event.target.checked ? [...selectedCities, city] : selectedCities.filter((value) => value !== city))} /><span>{city}</span></label>)}</fieldset>}
 
           {invalidPeriod ? <div role="alert" className={styles.empty}>Informe um periodo valido, com a data inicial anterior ou igual a final.</div>
             : isError ? <div role="alert" className={styles.empty}>Nao foi possivel carregar os dados.<button onClick={() => void refetch()}>Tentar novamente</button></div>

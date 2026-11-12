@@ -55,7 +55,8 @@
 .infoTooltip { position: absolute; left: calc(100% + 10px); top: 50%; z-index: 10; width: 275px; padding: 12px 14px; border-radius: 12px; background: var(--ink); color: #fff; font-size: 11px; font-weight: 400; line-height: 1.55; box-shadow: 0 8px 24px #11111124; visibility: hidden; opacity: 0; transform: translateY(-45%); transition: opacity .12s ease; }
 .infoButton:hover + .infoTooltip, .infoButton:focus-visible + .infoTooltip { visibility: visible; opacity: 1; }
 .filters { display: grid; align-content: start; gap: 10px; min-width: 0; padding: 14px 16px; border: 1px solid #e0e0e0; border-radius: 19px; background: #fff; box-shadow: 0 5px 20px #11111108; }
-.filterTitle { display: flex; align-items: center; gap: 7px; font-size: 11px; min-height: 22px; }
+.filterTitle { display: flex; align-items: center; justify-content: space-between; width: 100%; font-size: 14px; font-weight: 600; min-height: 22px; }
+.filters .filterTitle > span { display: inline; }
 .filterTitle > button { border: 0; background: none; color: var(--ink); padding: 6px; display: grid; place-items: center; }
 .filterFields { display: grid; gap: 10px; min-width: 0; }
 .dateFilters, .categoryFilters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; min-width: 0; }

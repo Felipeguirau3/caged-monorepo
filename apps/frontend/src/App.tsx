@@ -4,7 +4,7 @@ import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router'
 import {
   ArrowDownToLine, ArrowRightLeft, ChartNoAxesCombined, ChevronRight, Database,
   ExternalLink, Info, LayoutDashboard, LogOut, Menu,
-  RotateCcw, Search, SlidersHorizontal, UserRound, X,
+  RotateCcw, Search, UserRound, X,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine,
@@ -106,7 +106,7 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
 
           <div className={styles.filterAnalyticsRow}>
             <section aria-label="Filtros da consulta" className={styles.filters}>
-              <div className={styles.filterTitle}><SlidersHorizontal size={17} /><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
+              <div className={styles.filterTitle}><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
               <div className={styles.filterFields}>
                 <div className={styles.dateFilters}>
                   <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>

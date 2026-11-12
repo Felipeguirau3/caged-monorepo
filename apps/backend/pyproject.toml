@@ -1,0 +1,17 @@
+[project]
+name = "caged-api"
+version = "0.1.0"
+description = "API de consultas e comparacoes do CAGED."
+requires-python = ">=3.11"
+dependencies = [
+    "caged-analytics",
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+]
+
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+caged-analytics = { workspace = true }

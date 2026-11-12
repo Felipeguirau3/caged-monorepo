@@ -102,20 +102,22 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
               <div className={styles.titleRow}><h1>{comparison ? 'Compare os municipios' : 'Mercado de trabalho'}</h1>{!comparison && <span className={styles.infoWrap}><button className={styles.infoButton} aria-label="Informacoes sobre a base de dados" aria-describedby="data-info-tooltip"><Info size={16} /></button><span id="data-info-tooltip" role="tooltip" className={styles.infoTooltip}>Base demonstrativa 2025. Valores ficticios; nao representam estatisticas oficiais do CAGED.</span></span>}</div>
               <p className={styles.subtitle}>{comparison ? 'Diferentes localidades, um mesmo recorte.' : 'Um olhar sobre os movimentos do emprego formal.'}</p>
             </div>
+          </div>
+
+          <div className={styles.filterAnalyticsRow}>
+            <section aria-label="Filtros da consulta" className={styles.filters}>
+              <div className={styles.filterTitle}><SlidersHorizontal size={17} /><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
+              <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
+              <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
+              {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
+              <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
+            </section>
             <section className={styles.metricStrip} aria-label="Indicadores do periodo">
               <article className={styles.metricSummary}><span>Saldo de empregos</span><strong>{signed(total.balance)}</strong></article>
               <article className={styles.metricSummary}><span>Admissoes</span><strong>{number.format(total.admissions)}</strong></article>
               <article className={styles.metricSummary}><span>Desligamentos</span><strong>{number.format(total.dismissals)}</strong></article>
             </section>
           </div>
-
-          <section aria-label="Filtros da consulta" className={styles.filters}>
-            <div className={styles.filterTitle}><SlidersHorizontal size={17} /><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
-            <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
-            <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
-            {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
-            <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
-          </section>
 
           {comparison && <fieldset className={styles.cityPicker}><legend>Municipios na comparacao</legend>{cities.map((city) => <label key={city}><input type="checkbox" checked={selectedCities.includes(city)} onChange={(event) => setSelectedCities(event.target.checked ? [...selectedCities, city] : selectedCities.filter((value) => value !== city))} /><span>{city}</span></label>)}</fieldset>}
 

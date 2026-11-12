@@ -2,7 +2,7 @@ import { useDeferredValue, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
 import {
-  ArrowDownToLine, ArrowRightLeft, ChartNoAxesCombined, ChevronRight, Database,
+  ArrowDownToLine, ArrowRightLeft, ChevronRight, Database,
   ExternalLink, Info, LayoutDashboard, LogOut, Menu,
   RotateCcw, Search, UserRound, X,
 } from 'lucide-react';
@@ -75,7 +75,7 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
     <div className={styles.app}>
       {mobileMenu && <button className={styles.scrim} aria-label="Fechar navegacao" onClick={() => setMobileMenu(false)} />}
       <aside className={`${styles.sidebar} ${mobileMenu ? styles.sidebarOpen : ''}`}>
-        <div className={styles.brand} aria-label="CAGED"><ChartNoAxesCombined size={18} /><span>CAGED</span></div>
+        <div className={styles.brand} aria-label="CAGED">CAGED</div>
         <nav className={styles.railNav} aria-label="Navegacao principal">
           <NavLink end title="Visao geral" aria-label="Visao geral" to={{ pathname: '/', search: params.toString() }} onClick={() => setMobileMenu(false)} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}><LayoutDashboard size={19} /><span>Visao geral</span></NavLink>
           <NavLink title="Comparar municipios" aria-label="Comparar municipios" to={{ pathname: '/comparar', search: params.toString() }} onClick={() => setMobileMenu(false)} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}><ArrowRightLeft size={19} /><span>Comparar municipios</span></NavLink>

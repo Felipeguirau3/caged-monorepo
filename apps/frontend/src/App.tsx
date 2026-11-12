@@ -107,10 +107,16 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
           <div className={styles.filterAnalyticsRow}>
             <section aria-label="Filtros da consulta" className={styles.filters}>
               <div className={styles.filterTitle}><SlidersHorizontal size={17} /><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
-              <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
-              <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
-              {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
-              <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
+              <div className={styles.filterFields}>
+                <div className={styles.dateFilters}>
+                  <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
+                  <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
+                </div>
+                <div className={`${styles.categoryFilters} ${comparison ? styles.singleCategory : ''}`}>
+                  {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
+                  <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
+                </div>
+              </div>
             </section>
             <section className={styles.metricStrip} aria-label="Indicadores do periodo">
               <article className={styles.metricSummary}><span>Saldo de empregos</span><strong>{signed(total.balance)}</strong></article>

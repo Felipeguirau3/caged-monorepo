@@ -42,7 +42,7 @@
 .heading h1 { font-family: 'Manrope', sans-serif; font-size: 29px; line-height: 1.3; font-weight: 700; margin: 0; color: var(--ink); }
 .subtitle { font-size: 12px; margin: 9px 0 0; color: var(--muted); }
 .metricStrip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.filterAnalyticsRow { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: stretch; gap: 12px; margin-bottom: 4px; }
+.filterAnalyticsRow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 12px; margin-bottom: 24px; }
 .filterTrigger { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; height: 56px; padding: 0 16px; border: 1px solid #e0e0e0; border-radius: 19px; background: #fff; color: var(--ink); text-align: left; box-shadow: 0 5px 20px #11111108; }
 .filterTrigger:hover { border-color: #bcbcbc; }
 .filterTrigger > span { flex: 0 0 auto; font-size: 13px; font-weight: 600; }

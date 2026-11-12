@@ -162,7 +162,6 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
             : isPending ? <div role="status" className={styles.empty}>Carregando indicadores...</div>
             : !records.length ? <div className={styles.empty}><Database size={30} /><h2>Nenhum resultado neste recorte</h2><p>{comparison && !selectedCities.length ? 'Nenhum municipio selecionado.' : 'A base demonstrativa contem dados de janeiro a dezembro de 2025.'}</p><button onClick={() => { setParams({}); setSelectedCities(['Campinas', 'Sao Paulo']); }}>Restaurar consulta</button></div>
             : <>
-              <div className={styles.resultMeta}><span><span className={styles.liveDot} />{period}</span><span>{comparison ? selectedCities.length : filters.city === 'all' ? cities.length : 1} municipios <span className={styles.metaDivider}>/</span> {filters.sector === 'all' ? '5 setores' : filters.sector}</span></div>
               <div className={styles.dashboardGrid}>
                 <div className={styles.dashboardColumn}>
                   <section className={`${styles.chartSection} ${styles.panelCard}`} aria-labelledby="city-chart-title">

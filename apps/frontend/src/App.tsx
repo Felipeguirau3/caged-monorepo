@@ -152,7 +152,7 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
             </section>
           </div>
 
-          {filterOpen && <dialog ref={filterDialogRef} className={styles.filterDialog} aria-labelledby="filter-dialog-title" onCancel={(event) => { event.preventDefault(); setFilterOpen(false); }} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); setFilterOpen(false); } }} onClick={(event) => { if (event.target === event.currentTarget) setFilterOpen(false); }}>
+          {filterOpen && <dialog ref={filterDialogRef} className={styles.filterDialog} aria-labelledby="filter-dialog-title" onCancel={(event) => { event.preventDefault(); const citySelect = filterDialogRef.current?.querySelector<HTMLDetailsElement>('details.cityMultiSelect'); if (citySelect?.open) citySelect.open = false; else setFilterOpen(false); }} onClick={(event) => { const citySelect = filterDialogRef.current?.querySelector<HTMLDetailsElement>('details.cityMultiSelect'); if (citySelect?.open && !citySelect.contains(event.target as Node)) citySelect.open = false; if (event.target === event.currentTarget) setFilterOpen(false); }}>
             <div className={styles.filterDialogHeader}><h2 id="filter-dialog-title">Filtros da consulta</h2><button type="button" aria-label="Fechar filtros" onClick={() => setFilterOpen(false)}><X size={18} /></button></div>
             <form className={styles.filterDialogForm} onSubmit={(event) => { event.preventDefault(); applyFilters(); }}>
               <div className={`${styles.filterFields} ${styles.dialogFields}`}>

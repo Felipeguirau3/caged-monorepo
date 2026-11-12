@@ -1,9 +1,9 @@
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
 import {
   ArrowDownToLine, ArrowRightLeft, ChevronDown, ChevronRight, Database,
-  ExternalLink, Info, LayoutDashboard, LogOut, Menu,
+  ExternalLink, Info, LayoutDashboard, LogOut, Menu, SlidersHorizontal,
   RotateCcw, Search, UserRound, X,
 } from 'lucide-react';
 import {
@@ -35,10 +35,14 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
   const [params, setParams] = useSearchParams();
   const [mobileMenu, setMobileMenu] = useState(false);
   const [accountPanel, setAccountPanel] = useState<'profile' | 'logout' | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [metric, setMetric] = useState<'balance' | 'movement'>('balance');
   const [dimension, setDimension] = useState<'city' | 'sector'>('city');
   const [search, setSearch] = useState('');
   const [selectedCities, setSelectedCities] = useState<string[]>(['Campinas', 'Sao Paulo']);
+  const [filterDraft, setFilterDraft] = useState<Filters>(defaultFilters);
+  const [cityDraft, setCityDraft] = useState<string[]>(['Campinas', 'Sao Paulo']);
+  const filterDialogRef = useRef<HTMLDialogElement>(null);
   const deferredSearch = useDeferredValue(search);
   const filters: Filters = {
     start: params.get('start') || defaultFilters.start,
@@ -63,12 +67,32 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
   const tableRows = grouped.filter((row) => row.name.toLocaleLowerCase('pt-BR')
     .includes(deferredSearch.toLocaleLowerCase('pt-BR')));
   const period = `${monthLabel(filters.start.match(validMonth) ? filters.start : '2025-01')}/${filters.start.slice(0, 4)} a ${monthLabel(filters.end.match(validMonth) ? filters.end : '2025-12')}/${filters.end.slice(0, 4)}`;
+  const citySummary = comparison
+    ? selectedCities.length === cities.length ? 'Todos os municipios' : `${selectedCities.length} municipios`
+    : filters.city === 'all' ? 'Todos os municipios' : filters.city;
+  const sectorSummary = filters.sector === 'all' ? 'Todos os setores' : filters.sector;
 
-  function setFilter(key: keyof Filters, value: string) {
+  useEffect(() => {
+    const dialog = filterDialogRef.current;
+    if (filterOpen && dialog && !dialog.open) dialog.showModal();
+  }, [filterOpen]);
+
+  function openFilters() {
+    setFilterDraft(filters);
+    setCityDraft(selectedCities);
+    setFilterOpen(true);
+  }
+
+  function applyFilters() {
     const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
+    for (const key of ['start', 'end', 'city', 'sector'] as const) {
+      const value = filterDraft[key];
+      if (value && value !== 'all') next.set(key, value);
+      else next.delete(key);
+    }
     setParams(next, { replace: true });
+    if (comparison) setSelectedCities(cityDraft);
+    setFilterOpen(false);
   }
 
   return (
@@ -105,26 +129,33 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
           </div>
 
           <div className={styles.filterAnalyticsRow}>
-            <section aria-label="Filtros da consulta" className={styles.filters}>
-              <div className={styles.filterTitle}><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>
-              <div className={styles.filterFields}>
-                <div className={styles.dateFilters}>
-                  <label>De<input aria-label="Periodo inicial" type="month" value={filters.start} onChange={(event) => setFilter('start', event.target.value)} /></label>
-                  <label>Ate<input aria-label="Periodo final" type="month" value={filters.end} onChange={(event) => setFilter('end', event.target.value)} /></label>
-                </div>
-                <div className={styles.categoryFilters}>
-                  {!comparison && <label>Municipio<select aria-label="Municipio" value={filters.city} onChange={(event) => setFilter('city', event.target.value)}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
-                  {comparison && <div className={styles.multiSelectField}><span>Municipios</span><details className={styles.cityMultiSelect}><summary aria-label="Selecionar municipios"><span>{selectedCities.length === 0 ? 'Selecionar municipios' : `${selectedCities.length} municipios selecionados`}</span><ChevronDown size={16} /></summary><div className={styles.cityOptions} role="group" aria-label="Municipios disponiveis">{cities.map((city) => <label key={city}><input type="checkbox" checked={selectedCities.includes(city)} onChange={(event) => setSelectedCities(event.target.checked ? [...selectedCities, city] : selectedCities.filter((value) => value !== city))} /><span>{city}</span></label>)}</div></details></div>}
-                  <label>Atividade economica<select aria-label="Atividade economica" value={filters.sector} onChange={(event) => setFilter('sector', event.target.value)}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
-                </div>
-              </div>
-            </section>
+            <button className={styles.filterTrigger} type="button" aria-haspopup="dialog" aria-expanded={filterOpen} onClick={openFilters}>
+              <SlidersHorizontal size={18} /><span>Filtros</span><small>{period} / {citySummary} / {sectorSummary}</small><ChevronDown size={17} />
+            </button>
             <section className={styles.metricStrip} aria-label="Indicadores do periodo">
               <article className={styles.metricSummary}><span>Saldo de empregos</span><strong>{signed(total.balance)}</strong></article>
               <article className={styles.metricSummary}><span>Admissoes</span><strong>{number.format(total.admissions)}</strong></article>
               <article className={styles.metricSummary}><span>Desligamentos</span><strong>{number.format(total.dismissals)}</strong></article>
             </section>
           </div>
+
+          {filterOpen && <dialog ref={filterDialogRef} className={styles.filterDialog} aria-labelledby="filter-dialog-title" onCancel={(event) => { event.preventDefault(); setFilterOpen(false); }} onKeyDown={(event) => { if (event.key === 'Escape') { event.preventDefault(); setFilterOpen(false); } }} onClick={(event) => { if (event.target === event.currentTarget) setFilterOpen(false); }}>
+            <div className={styles.filterDialogHeader}><h2 id="filter-dialog-title">Filtros da consulta</h2><button type="button" aria-label="Fechar filtros" onClick={() => setFilterOpen(false)}><X size={18} /></button></div>
+            <form className={styles.filterDialogForm} onSubmit={(event) => { event.preventDefault(); applyFilters(); }}>
+              <div className={`${styles.filterFields} ${styles.dialogFields}`}>
+                <div className={styles.dateFilters}>
+                  <label>De<input aria-label="Periodo inicial" type="month" value={filterDraft.start} onChange={(event) => setFilterDraft((current) => ({ ...current, start: event.target.value }))} /></label>
+                  <label>Ate<input aria-label="Periodo final" type="month" value={filterDraft.end} onChange={(event) => setFilterDraft((current) => ({ ...current, end: event.target.value }))} /></label>
+                </div>
+                <div className={styles.categoryFilters}>
+                  {!comparison && <label>Municipio<select aria-label="Municipio" value={filterDraft.city} onChange={(event) => setFilterDraft((current) => ({ ...current, city: event.target.value }))}><option value="all">Todos os municipios</option>{cities.map((city) => <option key={city}>{city}</option>)}</select></label>}
+                  {comparison && <div className={styles.multiSelectField}><span>Municipios</span><details className={styles.cityMultiSelect}><summary aria-label="Selecionar municipios"><span>{cityDraft.length === 0 ? 'Selecionar municipios' : `${cityDraft.length} municipios selecionados`}</span><ChevronDown size={16} /></summary><div className={styles.cityOptions} role="group" aria-label="Municipios disponiveis">{cities.map((city) => <label key={city}><input type="checkbox" checked={cityDraft.includes(city)} onChange={(event) => setCityDraft(event.target.checked ? [...cityDraft, city] : cityDraft.filter((value) => value !== city))} /><span>{city}</span></label>)}</div></details></div>}
+                  <label>Atividade economica<select aria-label="Atividade economica" value={filterDraft.sector} onChange={(event) => setFilterDraft((current) => ({ ...current, sector: event.target.value }))}><option value="all">Todos os setores</option>{sectors.map((sector) => <option key={sector}>{sector}</option>)}</select></label>
+                </div>
+              </div>
+              <div className={styles.filterDialogActions}><button className={styles.filterReset} type="button" onClick={() => { setFilterDraft(defaultFilters); setCityDraft([...cities]); }}><RotateCcw size={14} />Limpar filtros</button><button type="button" onClick={() => setFilterOpen(false)}>Cancelar</button><button type="submit">Aplicar filtros</button></div>
+            </form>
+          </dialog>}
 
           {invalidPeriod ? <div role="alert" className={styles.empty}>Informe um periodo valido, com a data inicial anterior ou igual a final.</div>
             : isError ? <div role="alert" className={styles.empty}>Nao foi possivel carregar os dados.<button onClick={() => void refetch()}>Tentar novamente</button></div>

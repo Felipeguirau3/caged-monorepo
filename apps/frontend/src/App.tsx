@@ -2,22 +2,23 @@ import { useDeferredValue, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
 import {
-  ArrowDownToLine, ArrowRightLeft, ChevronDown, ChevronRight, Database,
-  ExternalLink, Info, LayoutDashboard, LogOut, Menu, SlidersHorizontal,
-  RotateCcw, Search, UserRound, X,
+  ArrowDownRight, ArrowDownToLine, ArrowRightLeft, ArrowUpRight, ChevronDown,
+  ChevronRight, Database, ExternalLink, Info, LayoutDashboard, LogOut, Menu, Minus,
+  SlidersHorizontal, RotateCcw, Search, UserRound, X,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine,
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import {
-  cities, defaultFilters, queryLabor, sectors, summarize, toCsv, totals,
+  cities, comparePeriodTrend, defaultFilters, queryLabor, sectors, summarize, toCsv, totals,
   type Filters, type Summary,
 } from './data/labor';
 import styles from './App.module.css';
 
 const number = new Intl.NumberFormat('pt-BR');
 const compact = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
+const percentage = new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 1 });
 const monthFormat = new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' });
 const monthLabel = (month: string) => monthFormat.format(new Date(`${month}-01T00:00:00Z`)).replace('.', '');
 const signed = (value: number) => `${value > 0 ? '+' : ''}${number.format(value)}`;
@@ -71,6 +72,18 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
     ? selectedCities.length === cities.length ? 'Todos os municipios' : `${selectedCities.length} municipios`
     : filters.city === 'all' ? 'Todos os municipios' : filters.city;
   const sectorSummary = filters.sector === 'all' ? 'Todos os setores' : filters.sector;
+
+  function trendChip(metricName: 'balance' | 'admissions' | 'dismissals') {
+    const trend = comparePeriodTrend(monthly, metricName);
+    if (!trend) {
+      return <span className={`${styles.trendChip} ${styles.trendUnavailable}`} title="Sem duas competencias comparaveis" aria-label="Sem duas competencias comparaveis">—</span>;
+    }
+
+    const label = `${trend.direction === 'up' ? 'Aumento' : trend.direction === 'down' ? 'Queda' : 'Sem variacao'} de ${percentage.format(trend.percentage)} entre ${monthLabel(trend.start)}/${trend.start.slice(0, 4)} e ${monthLabel(trend.end)}/${trend.end.slice(0, 4)}; dados demonstrativos.`;
+    const TrendIcon = trend.direction === 'up' ? ArrowUpRight : trend.direction === 'down' ? ArrowDownRight : Minus;
+    const tone = trend.direction === 'up' ? styles.trendUp : trend.direction === 'down' ? styles.trendDown : styles.trendFlat;
+    return <span className={`${styles.trendChip} ${tone}`} title={label} aria-label={label}><TrendIcon size={12} aria-hidden="true" />{percentage.format(trend.percentage)}</span>;
+  }
 
   useEffect(() => {
     const dialog = filterDialogRef.current;
@@ -133,9 +146,9 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
               <SlidersHorizontal size={18} /><span>Filtros</span><small>{period} / {citySummary} / {sectorSummary}</small><ChevronDown size={17} />
             </button>
             <section className={styles.metricStrip} aria-label="Indicadores do periodo">
-              <article className={styles.metricSummary}><span>Saldo de empregos</span><strong>{signed(total.balance)}</strong></article>
-              <article className={styles.metricSummary}><span>Admissoes</span><strong>{number.format(total.admissions)}</strong></article>
-              <article className={styles.metricSummary}><span>Desligamentos</span><strong>{number.format(total.dismissals)}</strong></article>
+              <article className={styles.metricSummary}><span>Saldo de empregos</span><div className={styles.metricValue}><strong>{signed(total.balance)}</strong>{trendChip('balance')}</div></article>
+              <article className={styles.metricSummary}><span>Admissoes</span><div className={styles.metricValue}><strong>{number.format(total.admissions)}</strong>{trendChip('admissions')}</div></article>
+              <article className={styles.metricSummary}><span>Desligamentos</span><div className={styles.metricValue}><strong>{number.format(total.dismissals)}</strong>{trendChip('dismissals')}</div></article>
             </section>
           </div>
 

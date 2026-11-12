@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  defaultFilters, demoRecords, filterRecords, queryLabor, summarize, toCsv, totals,
+  comparePeriodTrend, defaultFilters, demoRecords, filterRecords, queryLabor, summarize, toCsv, totals,
 } from './labor';
 
 describe('consultas demonstrativas', () => {
@@ -20,6 +20,25 @@ describe('consultas demonstrativas', () => {
     expect(cities).toHaveLength(4);
     expect(cities.reduce((sum, city) => sum + city.balance, 0)).toBe(total.balance);
     expect(summarize(demoRecords, 'month')).toHaveLength(12);
+  });
+
+  it('compara a primeira e ultima competencia sem inventar uma base para periodos curtos', () => {
+    const rows = [
+      { name: '2025-01', admissions: 100, dismissals: 80, balance: 20 },
+      { name: '2025-02', admissions: 120, dismissals: 90, balance: 30 },
+      { name: '2025-03', admissions: 80, dismissals: 100, balance: -20 },
+    ];
+
+    expect(comparePeriodTrend(rows, 'admissions')).toEqual({
+      direction: 'down', percentage: 0.2, start: '2025-01', end: '2025-03',
+    });
+    expect(comparePeriodTrend(rows, 'balance')).toEqual({
+      direction: 'down', percentage: 2, start: '2025-01', end: '2025-03',
+    });
+    expect(comparePeriodTrend(rows.slice(0, 1), 'admissions')).toBeNull();
+    expect(comparePeriodTrend([
+      { name: '2025-01', admissions: 0, dismissals: 0, balance: 0 }, rows[1],
+    ], 'admissions')).toBeNull();
   });
 
   it('retorna vazio sem inventar resultados fora do periodo', async () => {

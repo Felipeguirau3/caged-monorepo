@@ -24,6 +24,13 @@ export interface Summary {
   balance: number;
 }
 
+export interface PeriodTrend {
+  direction: 'up' | 'down' | 'flat';
+  percentage: number;
+  start: string;
+  end: string;
+}
+
 export const defaultFilters: Filters = {
   start: '2025-01', end: '2025-12', city: 'all', sector: 'all',
 };
@@ -59,6 +66,25 @@ export function summarize(records: LaborRecord[], group: 'month' | 'city' | 'sec
     grouped.set(name, summary);
   }
   return [...grouped.values()].sort((first, second) => first.name.localeCompare(second.name));
+}
+
+export function comparePeriodTrend(
+  rows: Summary[],
+  metric: keyof Omit<Summary, 'name'>,
+): PeriodTrend | null {
+  if (rows.length < 2) return null;
+
+  const first = rows[0];
+  const last = rows[rows.length - 1];
+  if (first[metric] === 0) return null;
+
+  const difference = last[metric] - first[metric];
+  return {
+    direction: difference > 0 ? 'up' : difference < 0 ? 'down' : 'flat',
+    percentage: Math.abs(difference / Math.abs(first[metric])),
+    start: first.name,
+    end: last.name,
+  };
 }
 
 export function totals(records: LaborRecord[]): Omit<Summary, 'name'> {

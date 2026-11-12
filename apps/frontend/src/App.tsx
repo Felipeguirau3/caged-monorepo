@@ -1,10 +1,10 @@
 import { useDeferredValue, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link, NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
+import { NavLink, Navigate, Route, Routes, useSearchParams } from 'react-router';
 import {
   ArrowDownLeft, ArrowDownToLine, ArrowRightLeft, ArrowUpRight, ChartNoAxesCombined,
-  Check, ChevronRight, Database, ExternalLink, LayoutDashboard, Menu, RotateCcw,
-  Search, SlidersHorizontal, X,
+  Check, ChevronRight, Database, ExternalLink, Info, LayoutDashboard, LogOut, Menu,
+  RotateCcw, Search, SlidersHorizontal, UserRound, X,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ReferenceLine,
@@ -34,6 +34,7 @@ function exportRows(rows: Summary[]) {
 function Dashboard({ comparison = false }: { comparison?: boolean }) {
   const [params, setParams] = useSearchParams();
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [accountPanel, setAccountPanel] = useState<'profile' | 'logout' | null>(null);
   const [metric, setMetric] = useState<'balance' | 'movement'>('balance');
   const [dimension, setDimension] = useState<'city' | 'sector'>('city');
   const [search, setSearch] = useState('');
@@ -73,14 +74,14 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
     <div className={styles.app}>
       {mobileMenu && <button className={styles.scrim} aria-label="Fechar navegacao" onClick={() => setMobileMenu(false)} />}
       <aside className={`${styles.sidebar} ${mobileMenu ? styles.sidebarOpen : ''}`}>
-        <Link className={styles.brand} to="/" aria-label="CAGED, inicio"><ChartNoAxesCombined size={21} /><span>CAGED</span></Link>
+        <div className={styles.brand} aria-label="CAGED"><ChartNoAxesCombined size={18} /><span>CAGED</span></div>
         <nav className={styles.railNav} aria-label="Navegacao principal">
           <NavLink end title="Visao geral" aria-label="Visao geral" to={{ pathname: '/', search: params.toString() }} onClick={() => setMobileMenu(false)} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}><LayoutDashboard size={19} /><span>Visao geral</span></NavLink>
           <NavLink title="Comparar municipios" aria-label="Comparar municipios" to={{ pathname: '/comparar', search: params.toString() }} onClick={() => setMobileMenu(false)} className={({ isActive }) => `${styles.navLink} ${isActive ? styles.active : ''}`}><ArrowRightLeft size={19} /><span>Comparar municipios</span></NavLink>
         </nav>
         <div className={styles.sidebarBottom}>
           <a className={styles.navLink} title="Fonte oficial do CAGED" aria-label="Fonte oficial do CAGED" href="https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/estatisticas-trabalho/novo-caged" target="_blank" rel="noreferrer"><ExternalLink size={18} /><span>Fonte oficial do CAGED</span></a>
-          <div className={styles.projectMark} aria-label="Projeto CAGED, Programacao II Unicamp"><span>CG</span><div>Projeto CAGED<small>Programacao II / Unicamp</small></div></div>
+          <button className={styles.navLink} title="Sair" aria-label="Sair" onClick={() => setAccountPanel('logout')}><LogOut size={18} /><span>Sair</span></button>
         </div>
       </aside>
 
@@ -88,16 +89,15 @@ function Dashboard({ comparison = false }: { comparison?: boolean }) {
         <header className={styles.topbar}>
           <button className={styles.menuButton} title="Abrir navegacao" aria-label="Abrir navegacao" onClick={() => setMobileMenu(true)}><Menu size={21} /></button>
           <div className={styles.breadcrumb}>Workspace<ChevronRight size={14} /><span>{comparison ? 'Comparacao' : 'Visao geral'}</span></div>
-          <span className={styles.demoBadge}><span />Dados simulados</span>
+          <button className={styles.profileButton} title="Perfil" aria-label="Perfil" aria-expanded={accountPanel === 'profile'} onClick={() => setAccountPanel(accountPanel === 'profile' ? null : 'profile')}><UserRound size={19} /></button>
+          {accountPanel && <div className={styles.accountPopover} role="status"><span>{accountPanel === 'profile' ? 'Autenticacao de perfil ainda nao configurada.' : 'Nenhuma sessao autenticada para encerrar.'}</span><button aria-label="Fechar aviso" onClick={() => setAccountPanel(null)}><X size={15} /></button></div>}
         </header>
 
         <main className={styles.main}>
           <div className={styles.heading}>
-            <div><p className={styles.eyebrow}>EMPREGO FORMAL / SAO PAULO</p><h1>{comparison ? 'Compare os municipios' : 'Mercado de trabalho'}</h1><p className={styles.subtitle}>{comparison ? 'Diferentes localidades, um mesmo recorte.' : 'Um olhar sobre os movimentos do emprego formal.'}</p></div>
-            <button className={styles.exportButton} onClick={() => exportRows(tableRows)} disabled={!tableRows.length || invalidPeriod || isError}><ArrowDownToLine size={17} />Exportar CSV</button>
+            <div><p className={styles.eyebrow}>EMPREGO FORMAL / SAO PAULO</p><div className={styles.titleRow}><h1>{comparison ? 'Compare os municipios' : 'Mercado de trabalho'}</h1>{!comparison && <span className={styles.infoWrap}><button className={styles.infoButton} aria-label="Informacoes sobre a base de dados" aria-describedby="data-info-tooltip"><Info size={16} /></button><span id="data-info-tooltip" role="tooltip" className={styles.infoTooltip}>Base demonstrativa 2025. Valores ficticios; nao representam estatisticas oficiais do CAGED.</span></span>}</div><p className={styles.subtitle}>{comparison ? 'Diferentes localidades, um mesmo recorte.' : 'Um olhar sobre os movimentos do emprego formal.'}</p></div>
+            <button className={styles.exportButton} title="Exportar CSV" aria-label="Exportar CSV" onClick={() => exportRows(tableRows)} disabled={!tableRows.length || invalidPeriod || isError}><span>Exportar CSV</span><ArrowDownToLine size={17} /></button>
           </div>
-
-          <div className={styles.demoNotice}><Database size={16} /><span>Base demonstrativa <strong>2025</strong><span className={styles.noticeDetail}> / Valores ficticios. Nao representam estatisticas oficiais do CAGED.</span></span></div>
 
           <section aria-label="Filtros da consulta" className={styles.filters}>
             <div className={styles.filterTitle}><SlidersHorizontal size={17} /><span>Filtros</span><button title="Limpar filtros" aria-label="Limpar filtros" onClick={() => { setParams({}); setSearch(''); }}><RotateCcw size={15} /></button></div>

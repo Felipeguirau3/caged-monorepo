@@ -6,8 +6,13 @@ antes das analises reais ficarem prontas. Quando ficarem, basta trocar
 o que get_data() devolve; as rotas nao mudam.
 """
 
+import os
 import unicodedata
+from functools import lru_cache
+from pathlib import Path
 from typing import Protocol
+
+from fastapi import HTTPException
 
 from caged_api.schemas import (
     City,
@@ -229,6 +234,29 @@ class FakeData:
 _FAKE_DATA = FakeData()
 
 
+def xlsx_path() -> Path | None:
+    """Planilha do CAGED: variavel CAGED_XLSX ou o primeiro *tabelas*.xlsx de data/raw."""
+    if os.environ.get("CAGED_XLSX"):
+        return Path(os.environ["CAGED_XLSX"])
+    raw = Path(__file__).resolve().parents[4] / "data" / "raw"
+    return next(iter(sorted(raw.glob("*tabelas*.xlsx"))), None)
+
+
+@lru_cache(maxsize=1)
+def _load_real(path: Path) -> DataSource:
+    from caged_api.real_data import RealData  # import aqui: real_data importa este arquivo
+
+    return RealData.from_xlsx(path)
+
+
 def get_data() -> DataSource:
-    """Ponto unico de troca: hoje devolve os dados falsos."""
-    return _FAKE_DATA
+    """Ponto unico de troca. Real por padrao; CAGED_USE_FAKE=1 volta aos dados falsos."""
+    if os.environ.get("CAGED_USE_FAKE") == "1":
+        return _FAKE_DATA
+    path = xlsx_path()
+    if path is None or not path.is_file():
+        raise HTTPException(
+            status_code=503,
+            detail="Planilha do CAGED não encontrada. Coloque-a em data/raw/ ou defina CAGED_XLSX.",
+        )
+    return _load_real(path)
